@@ -1,0 +1,29 @@
+---
+- name: Create /etc/bash_completion.d if it doesn't exist
+  ansible.builtin.file:
+    path: /etc/bash_completion.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+
+- name: Add kubectl completion
+  ansible.builtin.shell: kubectl completion bash > /etc/bash_completion.d/kubectl
+  args:
+    creates: /etc/bash_completion.d/kubectl
+  become: true
+
+- name: Add k alias for kubectl
+  ansible.builtin.lineinfile:
+    path: /etc/bash_completion.d/kubectl
+    regexp: "^\\s*complete -o default -F __start_kubectl.*$"
+    line: "    complete -o default -F __start_kubectl kubectl k"
+  become: true
+
+- name: Add k alias for kubectl
+  ansible.builtin.lineinfile:
+    path: /etc/bash_completion.d/kubectl
+    regexp: "^\\s*complete -o default -o nospace -F __start_kubectl.*$"
+    line: "    complete -o default -o nospace -F __start_kubectl kubectl k"
+  become: true

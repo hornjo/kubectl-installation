@@ -1,0 +1,71 @@
+---
+- name: Get latest stable version of kubectl
+  ansible.builtin.uri:
+    url: https://dl.k8s.io/release/stable.txt
+    return_content: true
+  register: kubectl_version_data
+  when: kubectl_version is undefined
+
+- name: Set kubectl_version
+  ansible.builtin.set_fact:
+    kubectl_version: "{{ kubectl_version_data.content }}"
+  when: kubectl_version is undefined
+
+- name: Set kubectl_arch
+  ansible.builtin.set_fact:
+    kubectl_arch: "{{ kubectl_arch_lookup[ansible_architecture] }}"
+
+- name: Get kubectl sha256
+  ansible.builtin.uri:
+    url: "https://dl.k8s.io/{{ kubectl_version }}/bin/linux/{{ kubectl_arch }}/kubectl.sha256"
+    return_content: true
+  register: kubectl_sha256_data
+
+- name: Set kubectl_sha256
+  ansible.builtin.set_fact:
+    kubectl_sha256: "{{ kubectl_sha256_data.content }}"
+
+- name: Set kubectl_version_short
+  ansible.builtin.set_fact:
+    kubectl_version_short: "{{ kubectl_version | regex_replace('^v(\\d+\\.\\d+)\\.\\d+$', '\\1') }}"
+
+- name: Set kubectl_binary
+  ansible.builtin.set_fact:
+    kubectl_binary: "kubectl-{{ kubectl_version_short }}"
+
+- name: Print variable values
+  ansible.builtin.debug:
+    msg:
+      - "kubectl_version: {{ kubectl_version }}"
+      - "kubectl_version_short: {{ kubectl_version_short }}"
+      - "kubectl_binary: {{ kubectl_binary }}"
+      - "kubectl_arch: {{ kubectl_arch }}"
+      - "kubectl_sha256: {{ kubectl_sha256 }}"
+
+- name: Install kubectl
+  ansible.builtin.get_url:
+    url: "https://dl.k8s.io/release/{{ kubectl_version }}/bin/linux/{{ kubectl_arch }}/kubectl"
+    dest: "/usr/local/bin/{{ kubectl_binary }}"
+    owner: root
+    group: root
+    mode: "0755"
+    checksum: "sha256:{{ kubectl_sha256 }}"
+  become: true
+
+- name: Link kubectl to {{ kubectl_binary }}
+  ansible.builtin.file:
+    src: "{{ kubectl_binary }}"
+    dest: /usr/local/bin/kubectl
+    owner: root
+    group: root
+    state: link
+  become: true
+
+- name: Link k to kubectl
+  ansible.builtin.file:
+    src: kubectl
+    dest: /usr/local/bin/k
+    owner: root
+    group: root
+    state: link
+  become: true

@@ -1,0 +1,6 @@
+---
+# define to set specific version, otherwise latest stable is used
+# kubectl_version: "v1.25.0"
+
+kubectl_arch_lookup:
+  x86_64: "amd64"

@@ -1,0 +1,18 @@
+galaxy_info:
+  author: Johannes Horn
+  description: Installation of kubectl with autocompletion.
+  license: BSD
+
+  min_ansible_version: '2.11'
+
+  platforms:
+    - name: Ubuntu
+      versions:
+        - 20.04
+        - 22.04
+
+  galaxy_tags:
+    - kubectl
+    - kubernetes
+
+dependencies: []

@@ -1,0 +1,6 @@
+---
+- name: Install kubectl
+  ansible.builtin.include_tasks: kubectl-install.yml
+
+- name: Set up autocompletion
+  ansible.builtin.include_tasks: autocompletion-config.yml
